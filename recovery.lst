@@ -1,0 +1,9 @@
+uuu_version 1.2.39
+
+SDP: boot -f u-boot-dtb.imx -nojump
+SDP: write -f zImage -addr 0x80800000
+SDP: write -f imx6sx-lm.dtb -addr 0x83000000
+SDP: write -f initrd -addr 0x84000000
+SDP: jump -f u-boot-dtb.imx -ivt
+FB: UCmd setenv bootargs init=/init earlycon
+FB: UCmd bootz 0x80800000 0x84000000:0x4391c00 0x83000000

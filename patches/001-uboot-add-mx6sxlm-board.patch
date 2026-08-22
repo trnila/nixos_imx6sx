@@ -1,0 +1,445 @@
+diff --git a/arch/arm/dts/imx6sx-lm.dts b/arch/arm/dts/imx6sx-lm.dts
+new file mode 100644
+index 00000000..e9df9055
+--- /dev/null
++++ b/arch/arm/dts/imx6sx-lm.dts
+@@ -0,0 +1,67 @@
++/dts-v1/;
++
++#include "imx6sx.dtsi"
++
++/ {
++    model = "imx6sx-lm";
++    compatible = "fsl,imx6sx";
++
++    memory@80000000 {
++        device_type = "memory";
++        reg = <0x80000000 0x80000000>;
++    };
++};
++
++
++&uart1 {
++    pinctrl-names = "default";
++    pinctrl-0 = <&pinctrl_uart1>;
++    status = "okay";
++};
++
++&usdhc4 {
++    status = "okay";
++    bus-width = <8>;
++    pinctrl-names = "default";
++    pinctrl-0 = <&pinctrl_usdhc4_1>;
++    keep-power-in-suspend;
++    enable-sdio-wakeup;
++    no-1-8-v;
++    non-removable;
++};
++
++&usbotg1 {
++    status = "okay";
++    dr_mode = "peripheral";
++};
++
++&usbotg2 {
++    status = "okay";
++    dr_mode = "peripheral";
++};
++
++&iomuxc {
++  pinctrl_uart1: uart1grp {
++      fsl,pins = <
++          MX6SX_PAD_GPIO1_IO04__UART1_TX		0x1b0b1
++          MX6SX_PAD_GPIO1_IO05__UART1_RX		0x1b0b1
++      >;
++  };
++
++  usdhc4 {
++    pinctrl_usdhc4_1: usdhc4grp-1 {
++      fsl,pins = <
++        MX6SX_PAD_SD4_CMD__USDHC4_CMD     0x17059
++        MX6SX_PAD_SD4_CLK__USDHC4_CLK     0x10059
++        MX6SX_PAD_SD4_DATA0__USDHC4_DATA0 0x17059
++        MX6SX_PAD_SD4_DATA1__USDHC4_DATA1 0x17059
++        MX6SX_PAD_SD4_DATA2__USDHC4_DATA2 0x17059
++        MX6SX_PAD_SD4_DATA3__USDHC4_DATA3 0x17059
++        MX6SX_PAD_SD4_DATA4__USDHC4_DATA4 0x17059
++        MX6SX_PAD_SD4_DATA5__USDHC4_DATA5 0x17059
++        MX6SX_PAD_SD4_DATA6__USDHC4_DATA6 0x17059
++        MX6SX_PAD_SD4_DATA7__USDHC4_DATA7 0x17059
++      >;
++    };
++  };
++};
+\ No newline at end of file
+diff --git a/arch/arm/mach-imx/mx6/Kconfig b/arch/arm/mach-imx/mx6/Kconfig
+index 7529b311..bb64b208 100644
+--- a/arch/arm/mach-imx/mx6/Kconfig
++++ b/arch/arm/mach-imx/mx6/Kconfig
+@@ -668,6 +668,16 @@ config TARGET_O4_IMX6ULL_NANO
+ 	  Support for www.out4.ru O4-iMX6UL-NANO platform
+ 	  based on Freescale's i.MX6UL/i.MX6ULL SoC.
+
++config TARGET_MX6SXLM
++	bool "mx6sxlm"
++	depends on MX6SX
++	select BOARD_EARLY_INIT_F
++	select DM
++	select DM_THERMAL
++	select SUPPORT_SPL
++	select FSL_CAAM
++	select ARCH_MISC_INIT
++
+ endchoice
+
+ config SYS_SOC
+@@ -720,5 +730,6 @@ source "board/udoo/neo/Kconfig"
+ source "board/wandboard/Kconfig"
+ source "board/BuR/brppt2/Kconfig"
+ source "board/out4/o4-imx6ull-nano/Kconfig"
++source "board/trnila/mx6sxlm/Kconfig"
+
+ endif
+diff --git a/board/trnila/mx6sxlm/Kconfig b/board/trnila/mx6sxlm/Kconfig
+new file mode 100644
+index 00000000..f82d3d0b
+--- /dev/null
++++ b/board/trnila/mx6sxlm/Kconfig
+@@ -0,0 +1,15 @@
++if TARGET_MX6SXLM
++
++config SYS_BOARD
++	default "mx6sxlm"
++
++config SYS_VENDOR
++	default "trnila"
++
++config SYS_CONFIG_NAME
++	default "mx6sxlm"
++
++config IMX_CONFIG
++	default "board/trnila/mx6sxlm/imximage.cfg"
++
++endif
+diff --git a/board/trnila/mx6sxlm/Makefile b/board/trnila/mx6sxlm/Makefile
+new file mode 100644
+index 00000000..96be9876
+--- /dev/null
++++ b/board/trnila/mx6sxlm/Makefile
+@@ -0,0 +1 @@
++obj-y  := mx6sxlm.o
+\ No newline at end of file
+diff --git a/board/trnila/mx6sxlm/imximage.cfg b/board/trnila/mx6sxlm/imximage.cfg
+new file mode 100644
+index 00000000..313ab589
+--- /dev/null
++++ b/board/trnila/mx6sxlm/imximage.cfg
+@@ -0,0 +1,137 @@
++/* SPDX-License-Identifier: GPL-2.0+ */
++/*
++ * Copyright (C) 2014 Freescale Semiconductor, Inc.
++ */
++
++#include <config.h>
++
++/* image version */
++
++IMAGE_VERSION 2
++
++/*
++ * Boot Device : one of
++ * spi/sd/nand/onenand, qspi/nor
++ */
++
++BOOT_FROM	sd
++
++/*
++ * Secure boot support
++ */
++#ifdef CONFIG_IMX_HAB
++CSF CONFIG_CSF_SIZE
++#endif
++
++/*
++ * Device Configuration Data (DCD)
++ *
++ * Each entry must have the format:
++ * Addr-type           Address        Value
++ *
++ * where:
++ *	Addr-type register length (1,2 or 4 bytes)
++ *	Address	  absolute address of the register
++ *	value	  value to be stored in the register
++ */
++
++/* Enable all clocks */
++DATA 4 0x020c4068 0xffffffff
++DATA 4 0x020c406c 0xffffffff
++DATA 4 0x020c4070 0xffffffff
++DATA 4 0x020c4074 0xffffffff
++DATA 4 0x020c4078 0xffffffff
++DATA 4 0x020c407c 0xffffffff
++DATA 4 0x020c4080 0xffffffff
++DATA 4 0x020c4084 0xffffffff
++
++/* IOMUX - DDR IO Type */
++DATA 4 0x020e0618 0x000c0000
++DATA 4 0x020e05fc 0x00000000
++
++/* Clock */
++DATA 4 0x020e032c 0x00000030
++
++/* Address */
++DATA 4 0x020e0300 0x00000020
++DATA 4 0x020e02fc 0x00000020
++DATA 4 0x020e05f4 0x00000020
++
++/* Control */
++DATA 4 0x020e0340 0x00000020
++
++DATA 4 0x020e0320 0x00000000
++DATA 4 0x020e0310 0x00000020
++DATA 4 0x020e0314 0x00000020
++DATA 4 0x020e0614 0x00000020
++
++/* Data Strobe */
++DATA 4 0x020e05f8 0x00020000
++DATA 4 0x020e0330 0x00000028
++DATA 4 0x020e0334 0x00000028
++DATA 4 0x020e0338 0x00000028
++DATA 4 0x020e033c 0x00000028
++
++/* Data */
++DATA 4 0x020e0608 0x00020000
++DATA 4 0x020e060c 0x00000028
++DATA 4 0x020e0610 0x00000028
++DATA 4 0x020e061c 0x00000028
++DATA 4 0x020e0620 0x00000028
++DATA 4 0x020e02ec 0x00000028
++DATA 4 0x020e02f0 0x00000028
++DATA 4 0x020e02f4 0x00000028
++DATA 4 0x020e02f8 0x00000028
++
++/* Calibrations - ZQ */
++DATA 4 0x021b0800 0xa1390003
++
++/* Write leveling */
++DATA 4 0x021b080c 0x00290025
++DATA 4 0x021b0810 0x00220022
++
++/* DQS Read Gate */
++DATA 4 0x021b083c 0x41480144
++DATA 4 0x021b0840 0x01340130
++
++/* Read/Write Delay */
++DATA 4 0x021b0848 0x3C3E4244
++DATA 4 0x021b0850 0x34363638
++
++/* Read data bit delay */
++DATA 4 0x021b081c 0x33333333
++DATA 4 0x021b0820 0x33333333
++DATA 4 0x021b0824 0x33333333
++DATA 4 0x021b0828 0x33333333
++
++/* Complete calibration by forced measurement */
++DATA 4 0x021b08b8 0x00000800
++
++/* MMDC init - DDR3, 64-bit mode, only MMDC0 is initiated */
++DATA 4 0x021b0004 0x0002002d
++DATA 4 0x021b0008 0x00333030
++DATA 4 0x021b000c 0x676b52f3
++DATA 4 0x021b0010 0xb66d8b63
++DATA 4 0x021b0014 0x01ff00db
++DATA 4 0x021b0018 0x00011740
++DATA 4 0x021b001c 0x00008000
++DATA 4 0x021b002c 0x000026d2
++DATA 4 0x021b0030 0x006b1023
++DATA 4 0x021b0040 0x0000005f
++DATA 4 0x021b0000 0x84190000
++
++/* Initialize MT41K256M16HA-125 - MR2 */
++DATA 4 0x021b001c 0x04008032
++/* MR3 */
++DATA 4 0x021b001c 0x00008033
++/* MR1 */
++DATA 4 0x021b001c 0x00048031
++/* MR0 */
++DATA 4 0x021b001c 0x05208030
++/* DDR device ZQ calibration */
++DATA 4 0x021b001c 0x04008040
++
++/* Final DDR setup, before operation start */
++DATA 4 0x021b0020 0x00000800
++DATA 4 0x021b0818 0x00011117
++DATA 4 0x021b001c 0x00000000
+diff --git a/board/trnila/mx6sxlm/mx6sxlm.c b/board/trnila/mx6sxlm/mx6sxlm.c
+new file mode 100644
+index 00000000..d05dc523
+--- /dev/null
++++ b/board/trnila/mx6sxlm/mx6sxlm.c
+@@ -0,0 +1,37 @@
++#include <asm/arch/iomux.h>
++#include <asm/arch/mx6-pins.h>
++#include <asm/arch/sys_proto.h>
++
++DECLARE_GLOBAL_DATA_PTR;
++
++#define UART_PAD_CTRL  (PAD_CTL_PKE | PAD_CTL_PUE |		\
++  PAD_CTL_PUS_100K_UP | PAD_CTL_SPEED_MED |		\
++  PAD_CTL_DSE_40ohm   | PAD_CTL_SRE_FAST  | PAD_CTL_HYS)
++
++static iomux_v3_cfg_t const uart1_pads[] = {
++  MX6_PAD_GPIO1_IO04__UART1_TX | MUX_PAD_CTRL(UART_PAD_CTRL),
++  MX6_PAD_GPIO1_IO05__UART1_RX | MUX_PAD_CTRL(UART_PAD_CTRL),
++};
++
++int dram_init(void)
++{
++  gd->ram_size = imx_ddr_size();
++  return 0;
++}
++
++int board_early_init_f(void)
++{
++  imx_iomux_v3_setup_multiple_pads(uart1_pads, ARRAY_SIZE(uart1_pads));
++  return 0;
++}
++
++int board_init(void)
++{
++  return 0;
++}
++
++int checkboard(void)
++{
++  puts("Board: MX6SXLM\n");
++  return 0;
++}
+\ No newline at end of file
+diff --git a/board/trnila/mx6sxlm/mx6sxlm.env b/board/trnila/mx6sxlm/mx6sxlm.env
+new file mode 100644
+index 00000000..3b2860dd
+--- /dev/null
++++ b/board/trnila/mx6sxlm/mx6sxlm.env
+@@ -0,0 +1,5 @@
++bootcmd=sysboot mmc 3:2 any 0x84000000 /boot/extlinux/extlinux.conf
++initrd_high=0xffffffff
++kernel_addr_r=0x80800000
++ramdisk_addr_r=0x84000000
++fdt_addr_r=0x83000000
+\ No newline at end of file
+diff --git a/configs/mx6sxlm_defconfig b/configs/mx6sxlm_defconfig
+new file mode 100644
+index 00000000..b23896ff
+--- /dev/null
++++ b/configs/mx6sxlm_defconfig
+@@ -0,0 +1,81 @@
++CONFIG_ARM=y
++CONFIG_ARCH_MX6=y
++CONFIG_TEXT_BASE=0x87800000
++CONFIG_SYS_MALLOC_LEN=0x300000
++CONFIG_NR_DRAM_BANKS=1
++CONFIG_SF_DEFAULT_SPEED=40000000
++CONFIG_ENV_SIZE=0x2000
++CONFIG_ENV_OFFSET=0x80000
++CONFIG_MX6SX=y
++CONFIG_TARGET_MX6SXLM=y
++CONFIG_DM_GPIO=y
++CONFIG_DEFAULT_DEVICE_TREE="imx6sx-lm"
++# CONFIG_CMD_BMODE is not set
++CONFIG_SUPPORT_RAW_INITRD=y
++CONFIG_USE_BOOTCOMMAND=y
++CONFIG_HUSH_PARSER=y
++CONFIG_SYS_MAXARGS=32
++CONFIG_SYS_PBSIZE=532
++CONFIG_CMD_BOOTZ=y
++# CONFIG_CMD_FLASH is not set
++CONFIG_CMD_GPIO=y
++CONFIG_CMD_I2C=y
++CONFIG_CMD_MMC=y
++CONFIG_CMD_USB=y
++# CONFIG_CMD_SETEXPR is not set
++CONFIG_CMD_DHCP=y
++CONFIG_CMD_MII=y
++CONFIG_CMD_PING=y
++CONFIG_CMD_CACHE=y
++CONFIG_CMD_TIME=y
++CONFIG_CMD_REGULATOR=y
++CONFIG_CMD_EXT2=y
++CONFIG_CMD_EXT4=y
++CONFIG_CMD_EXT4_WRITE=y
++CONFIG_CMD_FAT=y
++CONFIG_CMD_FS_GENERIC=y
++CONFIG_OF_CONTROL=y
++CONFIG_ENV_OVERWRITE=y
++CONFIG_SYS_RELOC_GD_ENV_ADDR=y
++CONFIG_USE_ETHPRIME=y
++CONFIG_ETHPRIME="FEC"
++CONFIG_BOUNCE_BUFFER=y
++CONFIG_DM_I2C=y
++CONFIG_SYS_I2C_MXC=y
++CONFIG_FSL_USDHC=y
++CONFIG_MTD=y
++CONFIG_DM_SPI_FLASH=y
++CONFIG_SPI_FLASH_STMICRO=y
++CONFIG_PHYLIB=y
++CONFIG_PHY_ATHEROS=y
++CONFIG_FEC_MXC=y
++CONFIG_MII=y
++CONFIG_PINCTRL=y
++CONFIG_PINCTRL_IMX6=y
++CONFIG_DM_PMIC=y
++CONFIG_DM_REGULATOR=y
++CONFIG_DM_REGULATOR_FIXED=y
++CONFIG_DM_REGULATOR_GPIO=y
++CONFIG_DM_SERIAL=y
++CONFIG_MXC_UART=y
++CONFIG_SPI=y
++CONFIG_DM_SPI=y
++CONFIG_FSL_QSPI=y
++CONFIG_IMX_THERMAL=y
++CONFIG_USB=y
++CONFIG_USB_STORAGE=y
++CONFIG_USB_HOST_ETHER=y
++CONFIG_USB_ETHER_ASIX=y
++CONFIG_NET_RANDOM_ETHADDR=y
++CONFIG_SYS_MMC_ENV_DEV=3
++CONFIG_DISTRO_DEFAULTS=y
++CONFIG_USB_GADGET=y
++CONFIG_FASTBOOT=y
++CONFIG_USB_FUNCTION_FASTBOOT=y
++CONFIG_CMD_FASTBOOT=y
++CONFIG_FASTBOOT_USB_DEV=3
++CONFIG_CI_UDC=y
++CONFIG_USB_GADGET_VENDOR_NUM=0x0525
++CONFIG_USB_GADGET_PRODUCT_NUM=0xa4a5
++CONFIG_FASTBOOT_UUU_SUPPORT=y
++CONFIG_BOOTDELAY=0
+diff --git a/include/configs/mx6sxlm.h b/include/configs/mx6sxlm.h
+new file mode 100644
+index 00000000..cf08a777
+--- /dev/null
++++ b/include/configs/mx6sxlm.h
+@@ -0,0 +1,20 @@
++#ifndef __MX6SXLM_CONFIG_H
++#define __MX6SXLM_CONFIG_H
++
++#include "mx6_common.h"
++
++#define CFG_MXC_UART_BASE	UART1_BASE
++#define CONSOLE_DEV		"ttymxc0"
++
++/* USB Configs */
++#define CFG_MXC_USB_PORTSC	(PORT_PTS_UTMI | PORT_PTS_PTW)
++#define CFG_MXC_USB_FLAGS	0
++
++/* Physical Memory Map */
++#define PHYS_SDRAM                     MMDC0_ARB_BASE_ADDR
++
++#define CFG_SYS_SDRAM_BASE          PHYS_SDRAM
++#define CFG_SYS_INIT_RAM_ADDR       IRAM_BASE_ADDR
++#define CFG_SYS_INIT_RAM_SIZE       IRAM_SIZE
++
++#endif
+--
+2.43.0

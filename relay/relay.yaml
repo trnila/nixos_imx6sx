@@ -1,0 +1,23 @@
+esphome:
+  name: relay
+
+esp32:
+  board: esp32dev
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+web_server:
+logger:
+
+switch:
+  - platform: gpio
+    name: "power"
+    pin:
+      number: GPIO4
+      inverted: true
+  - platform: gpio
+    name: "boot"
+    pin:
+      number: GPIO0

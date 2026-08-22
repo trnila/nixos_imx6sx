@@ -1,0 +1,16 @@
+name: deploy
+
+on:
+  workflow_dispatch:
+  push:
+  pull_request:
+
+jobs:
+  prek:
+    # dont run on both pull request and push event
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: cachix/install-nix-action@v31
+      - run: nix develop -c prek run --all-files

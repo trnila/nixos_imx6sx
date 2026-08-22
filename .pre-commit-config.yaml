@@ -1,0 +1,17 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+  - repo: https://github.com/NixOS/nixfmt
+    rev: v1.3.0
+    hooks:
+      - id: nixfmt-nix
+  - repo: local
+    hooks:
+      - id: nix-flake-check
+        name: nix flake check
+        entry: nix flake check
+        language: system
+        pass_filenames: false

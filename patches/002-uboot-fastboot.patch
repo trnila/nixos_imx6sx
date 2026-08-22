@@ -1,0 +1,6 @@
+diff --git a/board/trnila/mx6sxlm/mx6sxlm.env b/board/trnila/mx6sxlm/mx6sxlm.env
+--- a/board/trnila/mx6sxlm/mx6sxlm.env
++++ b/board/trnila/mx6sxlm/mx6sxlm.env
+@@ -1,1 +1,1 @@
+-bootcmd=sysboot mmc 3:2 any 0x84000000 /boot/extlinux/extlinux.conf
++bootcmd=fastboot usb 0

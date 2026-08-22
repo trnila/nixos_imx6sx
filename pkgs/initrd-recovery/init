@@ -1,0 +1,35 @@
+#!/bin/sh
+echo "=== Recovery ==="
+set -ex
+
+mount -t proc proc /proc
+mount -t sysfs sysfs /sys
+mount -t devtmpfs devtmpfs /dev
+mount -t configfs none /sys/kernel/config
+
+# expose eMMC via USB mass storage
+(
+    cd /sys/kernel/config/usb_gadget
+    mkdir g1
+    cd g1
+
+    echo 0x1d6b > idVendor
+    echo 0x0104 > idProduct
+
+    mkdir -p strings/0x409
+    echo "123456789" > strings/0x409/serialnumber
+    echo "trnila" > strings/0x409/manufacturer
+    echo "USB Disk" > strings/0x409/product
+
+    mkdir -p functions/mass_storage.usb0
+    echo /dev/mmcblk3 > functions/mass_storage.usb0/lun.0/file
+    echo 1 > functions/mass_storage.usb0/lun.0/removable
+
+    mkdir -p configs/c.1
+    ln -s functions/mass_storage.usb0 configs/c.1/
+
+    echo ci_hdrc.0 > UDC
+)
+set +ex
+echo "Now you can mount eMMC on your computer."
+exec /bin/sh
