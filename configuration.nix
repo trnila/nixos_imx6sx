@@ -61,6 +61,11 @@
       };
     }
   ];
+  boot.extraModulePackages = [
+    (pkgs.callPackage ./pkgs/linux-lin.nix {
+      kernel = config.boot.kernelPackages.kernel;
+    })
+  ];
 
   hardware.deviceTree.enable = true;
   hardware.deviceTree.dtbSource = pkgs.dtb-imx6sx-lm;
@@ -95,6 +100,10 @@
       BitRate = 500000;
     };
   };
+  systemd.network.networks."90-sllin0" = {
+    matchConfig.Name = "sllin0";
+  };
+
   time.timeZone = "Europe/Prague";
 
   environment.systemPackages = with pkgs; [
