@@ -81,6 +81,12 @@
     phy-reset-gpios = <&gpio2 6 GPIO_ACTIVE_HIGH>;
 };
 
+&flexcan1 {
+    pinctrl-names = "default";
+    pinctrl-0 = <&pinctrl_flexcan1>;
+    status = "okay";
+};
+
 &iomuxc {
     pinctrl_uart1: uart1grp {
         fsl,pins = <
@@ -178,6 +184,13 @@
 
             /* reset phy */
             MX6SX_PAD_ENET2_CRS__GPIO2_IO_7        0x3081
+        >;
+    };
+
+    pinctrl_flexcan1: pinctrl_flexcan1 {
+        fsl,pins = <
+            MX6SX_PAD_KEY_COL2__CAN1_TX 0x1b020
+            MX6SX_PAD_KEY_ROW2__CAN1_RX	0x1b020
         >;
     };
 };

@@ -91,6 +91,12 @@
       "10.0.0.1/24"
     ];
   };
+  systemd.network.networks."90-can0" = {
+    matchConfig.Name = "can0";
+    canConfig = {
+      BitRate = 500000;
+    };
+  };
   time.timeZone = "Europe/Prague";
 
   environment.systemPackages = with pkgs; [
@@ -99,6 +105,7 @@
     dtc
     tcpdump
     libgpiod
+    can-utils
   ];
 
   services.getty.autologinUser = "root";
