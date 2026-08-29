@@ -48,6 +48,7 @@
   boot.kernelPackages = pkgs.linuxPackagesFor (
     pkgs.linux_latest.override {
       defconfig = "imx_v6_v7_defconfig";
+      autoModules = false;
     }
   );
   boot.kernelPatches = [
@@ -58,6 +59,24 @@
         IOSCHED_BFQ = lib.mkForce yes;
         RPMB = yes;
         MMC_BLOCK = yes;
+        IMX_SDMA = yes;
+        DAX = yes;
+        NETFILTER_XT_MATCH_CONNTRACK = yes;
+        NF_CONNTRACK_BRIDGE = yes;
+        NF_DEFRAG_IPV4 = yes;
+        NF_DEFRAG_IPV6 = yes;
+        NETFILTER_XT_MATCH_PKTTYPE = yes;
+        NETFILTER_XTABLES = yes;
+        IP6_NF_MATCH_RPFILTER = yes;
+        IP_NF_IPTABLES = yes;
+        IP6_NF_IPTABLES = yes;
+        IP_NF_MATCH_RPFILTER = yes;
+        NFT_COMPAT = yes;
+        NF_CONNTRACK = yes;
+        NF_TABLES = yes;
+        NETFILTER_NETLINK = yes;
+        NET_SCH_FQ_CODEL = yes;
+        BLK_DEV_DM = yes;
       };
     }
   ];
