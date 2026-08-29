@@ -5,6 +5,10 @@
   ...
 }:
 {
+  imports = [
+    ./modules/usb_ethernet.nix
+  ];
+
   system.stateVersion = "26.05";
   nix.settings.experimental-features = [
     "nix-command"
@@ -61,6 +65,7 @@
   hardware.deviceTree.enable = true;
   hardware.deviceTree.dtbSource = pkgs.dtb-imx6sx-lm;
   hardware.deviceTree.name = "imx6sx-lm.dtb";
+  hardware.usbEthernet.enable = true;
 
   boot.kernelParams = [
     "earlycon"
@@ -69,7 +74,6 @@
   boot.loader.generic-extlinux-compatible.enable = true;
   boot.initrd.compressor = "gzip";
   boot.initrd.availableKernelModules = lib.mkForce [ ];
-  boot.kernelModules = [ "g_cdc" ];
 
   services.journald.storage = "volatile";
 
@@ -85,12 +89,6 @@
   networking.hostName = "imx";
   networking.networkmanager.enable = false;
   networking.useNetworkd = true;
-  systemd.network.networks."90-usb0" = {
-    matchConfig.Name = "usb0";
-    address = [
-      "10.0.0.1/24"
-    ];
-  };
   systemd.network.networks."90-can0" = {
     matchConfig.Name = "can0";
     canConfig = {
