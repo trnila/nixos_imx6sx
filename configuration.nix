@@ -46,7 +46,7 @@
   ];
 
   boot.kernelPackages = pkgs.linuxPackagesFor (
-    pkgs.linux.override {
+    pkgs.linux_latest.override {
       defconfig = "imx_v6_v7_defconfig";
     }
   );
