@@ -90,6 +90,9 @@
         RPMSG_NS = yes;
         RPMSG_TTY = yes;
         SAMPLE_RPMSG_CLIENT = yes;
+
+        STRICT_DEVMEM = no;
+        IO_STRICT_DEVMEM = no;
       };
     }
   ];
