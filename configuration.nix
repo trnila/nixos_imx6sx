@@ -77,6 +77,19 @@
         NETFILTER_NETLINK = yes;
         NET_SCH_FQ_CODEL = yes;
         BLK_DEV_DM = yes;
+
+        REMOTEPROC = yes;
+        IMX_REMOTEPROC = yes;
+
+        IMX_MBOX = yes;
+
+        RPMSG = yes;
+        RPMSG_VIRTIO = yes;
+        RPMSG_CHAR = yes;
+        RPMSG_CTRL = yes;
+        RPMSG_NS = yes;
+        RPMSG_TTY = yes;
+        SAMPLE_RPMSG_CLIENT = yes;
       };
     }
   ];

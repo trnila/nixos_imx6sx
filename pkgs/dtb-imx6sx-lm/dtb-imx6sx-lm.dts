@@ -9,6 +9,54 @@
     chosen {
         stdout-path = &uart1;
     };
+
+    reserved-memory {
+        #address-cells = <1>;
+        #size-cells = <1>;
+        ranges;
+
+        vdev0vring0: vdev0vring0 {
+            compatible = "shared-dma-pool";
+            no-map;
+            reg = <0x9fdf0000 0x8000>;
+        };
+
+        vdev0vring1: vdev0vring1 {
+            compatible = "shared-dma-pool";
+            no-map;
+            reg = <0x9fdf8000 0x8000>;
+        };
+
+        vdev0buffer: vdev0buffer {
+            compatible = "shared-dma-pool";
+            no-map;
+            reg = <0x9ff94000 0x1000000>;
+        };
+    };
+
+    cm4 {
+        compatible = "fsl,imx6sx-cm4";
+        status = "okay";
+        syscon = <&src>;
+        memory-region = <&vdev0vring0>, <&vdev0vring1>, <&vdev0buffer>;
+        clocks = <&clks IMX6SX_CLK_M4>;
+        mbox-names = "tx", "rx";
+        mboxes = <&mu 0 0>, <&mu 1 0>;
+    };
+};
+
+&soc {
+     mu: mu@02294000 {
+        compatible = "fsl,imx6sx-mu";
+        status = "okay";
+        reg = <0x02294000 0x4000>;
+        interrupts = <GIC_SPI 90 IRQ_TYPE_LEVEL_HIGH>;
+        #mbox-cells = <2>;
+    };
+};
+
+&src {
+    compatible = "fsl,imx6sx-src", "fsl,imx51-src", "syscon";
 };
 
 /* debug UART */
